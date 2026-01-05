@@ -16,15 +16,29 @@ SELECT * FROM products_staging;
 // ELT - Load
 -- Dim Product (SCD 1)
 CREATE OR REPLACE TABLE dim_product AS
-SELECT DISTINCT
+WITH withName AS (
+    SELECT
+        ean,
+        SPLIT(
+            SPLIT(url, '/')[ARRAY_SIZE(SPLIT(url, '/')) - 1], '?'
+        )[0] AS possible_name
+    FROM products_staging
+)
+SELECT
     ean,
-    url,
-    currency,
-    country,
-    verified,
-    directly_sold_on_google
-FROM products_staging;
--- kontrola
+    possible_name
+FROM withName
+QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY ean
+    ORDER BY
+        CASE
+            WHEN possible_name RLIKE '^[A-Za-z-]+$' THEN 0
+            ELSE 1
+        END,
+        LENGTH(possible_name) DESC,
+        possible_name
+) = 1;
+-- konrola
 SELECT * FROM dim_product;
 
 -- Dim Shop (SCD 0)
@@ -52,10 +66,27 @@ SELECT * FROM dim_promotion;
 -- Dim Offer (SCD 0)
 CREATE OR REPLACE TABLE dim_offer AS
 SELECT
-    ROW_NUMBER() OVER (ORDER BY offer_additional_comment) AS idoffer,
+    ROW_NUMBER() OVER (ORDER BY url) AS idoffer,
+    url,
+    currency,
+    country,
+    verified,
+    directly_sold_on_google,
     offer_additional_comment AS additional_comment
 FROM (
-    SELECT DISTINCT offer_additional_comment FROM products_staging
+    SELECT *
+    FROM (
+        SELECT
+            url,
+            currency,
+            country,
+            verified,
+            directly_sold_on_google,
+            offer_additional_comment,
+            ROW_NUMBER() OVER (PARTITION BY url ORDER BY position) AS rn
+        FROM products_staging
+    ) t
+    WHERE rn = 1
 );
 -- kontrola
 SELECT * FROM dim_offer;
@@ -102,7 +133,21 @@ SELECT * FROM dim_date;
 CREATE OR REPLACE TABLE fact_product_pricing AS
 SELECT
     ROW_NUMBER() OVER (ORDER BY ean, idshop) AS id_product_pricing,
-    *
+    idshop,
+    ean,
+    idoffer,
+    idpromotion,
+    iddate,
+    idtime,
+    price,
+    old_price,
+    shipping_cost,
+    total_cost,
+    position,
+    shop_review_rating,
+    shop_review_count,
+    avg_product_price,
+    count_shops_selling
 FROM (
     SELECT DISTINCT
         s.idshop,
@@ -120,15 +165,18 @@ FROM (
         ps.shop_review_count,
         -- ELT - Transform (Window functions)
         AVG(ps.price) OVER (PARTITION BY p.ean) AS avg_product_price,
-        COUNT(DISTINCT ps.shop_name) OVER (PARTITION BY p.ean) AS count_shops_selling
+        COUNT(DISTINCT ps.shop_name) OVER (PARTITION BY p.ean) AS count_shops_selling,
+        -- Removing duplicates
+        ROW_NUMBER() OVER (PARTITION BY o.url ORDER BY position) AS rn
     FROM products_staging ps
     JOIN dim_product p ON ps.ean = p.ean
     JOIN dim_shop s ON ps.shop_name = s.name
     JOIN dim_promotion pr ON COALESCE(ps.promotion_label_text, 'N/A') = pr.label_text
-    JOIN dim_offer o ON ps.offer_additional_comment = o.additional_comment
+    JOIN dim_offer o ON ps.url = o.url
     JOIN dim_date ddate ON TO_CHAR(DATE(TO_TIMESTAMP_LTZ(latest_update)), 'YYYYMMDD') = ddate.iddate
     JOIN dim_time dtime ON TO_CHAR(TIME(TO_TIMESTAMP_LTZ(latest_update))::TIME(0), 'HH24MISS') = dtime.idtime
-);
+)
+WHERE rn = 1;
 -- kontrola
 SELECT * FROM fact_product_pricing
 ORDER BY id_product_pricing;
