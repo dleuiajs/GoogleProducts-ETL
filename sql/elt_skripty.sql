@@ -41,7 +41,7 @@ QUALIFY ROW_NUMBER() OVER (
 -- konrola
 SELECT * FROM dim_product;
 
--- Dim Shop (SCD 0)
+-- Dim Shop (SCD 1)
 CREATE OR REPLACE TABLE dim_shop AS
 SELECT
     ROW_NUMBER() OVER (ORDER BY shop_name) AS idshop,
@@ -53,7 +53,7 @@ FROM (
 -- kontrola
 SELECT * FROM dim_shop;
 
--- Dim Promotion (SCD 0)
+-- Dim Promotion (SCD 1)
 CREATE OR REPLACE TABLE dim_promotion AS
 SELECT
     ROW_NUMBER() OVER (ORDER BY promotion_label_text) AS idpromotion,
