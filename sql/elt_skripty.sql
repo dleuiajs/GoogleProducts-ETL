@@ -21,7 +21,7 @@ WITH withName AS (
         ean,
         SPLIT(
             SPLIT(url, '/')[ARRAY_SIZE(SPLIT(url, '/')) - 1], '?'
-        )[0] AS possible_name
+        )[0]::TEXT AS possible_name
     FROM products_staging
 )
 SELECT
