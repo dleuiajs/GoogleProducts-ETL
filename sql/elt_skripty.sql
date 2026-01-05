@@ -1,19 +1,19 @@
-// Využívame našu databázu
+-- Využívame našu databázu
 USE WAREHOUSE PIRANHA_WH;
 USE DATABASE PIRANHA_DB;
 
-// Vytvorenie schémy pre tabuľky
+-- Vytvorenie schémy pre tabuľky
 CREATE OR REPLACE SCHEMA PIRANHA_PRODUCTS_ELT;
 USE SCHEMA PIRANHA_PRODUCTS_ELT;
 
-// ELT - Extract
+-- ELT - Extract
 -- Products Staging
 CREATE OR REPLACE TABLE products_staging AS
 SELECT * FROM GOOGLE_SHOPPING_PRODUCTS_PRICES_DATASET.PUBLIC.GOOGLE_SHOPPING;
 -- kontrola
 SELECT * FROM products_staging;
 
-// ELT - Load
+-- ELT - Load
 -- Dim Product (SCD 1)
 CREATE OR REPLACE TABLE dim_product AS
 WITH withName AS (
