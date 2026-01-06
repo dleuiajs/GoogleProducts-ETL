@@ -115,7 +115,6 @@ V tomto príkaze sa vytvára alebo nahrádza tabuľka `dim_offer`, ktorá preber
 V tejto fáze odstránime nadbytočné údaje, odstránime duplicity, zjednotíme typy, vytvoríme dodatočné atribúty, ktoré budú užitočné pre naše diagramy a použijeme window funkcie.
 
 Pozrime sa na transformáciu tabuľky `dim_offer`, ktorú sme rozoberali v časti [3.2 Load](#32-load):
-
 #### Kód:
 ```sql
 CREATE OR REPLACE TABLE dim_offer AS
@@ -146,14 +145,12 @@ FROM (
 Tu používame funkciu Window **ROW_NUMBER()** pre `idoffer`, ktorá čísluje každý tovar z objednávky podľa odkazu, v poddotaze opäť používame **ROW_NUMBER()** pre `rn`, avšak už s poradím tovaru v reklamných oznámeniach, potom vyberieme všetky riadky, kde `rn` = 1, t. j. odstránime duplicitné záznamy.
 
 Určite skontrolujeme, či sú všetky údaje správne zaznamenané:
-
 #### Kód:
 ```sql
 SELECT * FROM dim_offer;
 ```
 
 Teraz sa pozrime na tabuľku `dim_product`:
-
 #### Kód:
 ```sql
 CREATE OR REPLACE TABLE dim_product AS
@@ -181,7 +178,7 @@ QUALIFY ROW_NUMBER() OVER (
 ) = 1;
 ```
 
-Tu používame **CTE**, v ktorom vyberáme z tabuľky `products_staging` `EAN` tovaru, a potom pomocou `URL` najprv ho rozdelíme pomocou prikazu **SPLIT()** s oddeľovačom '/' a pomocou **ARRAY_SIZE() - 1** vyberieme poslednú časť v tomto poli, t. j. zvyčajne názov tovaru  *(nie vždy je to však názov tovaru, ďalej sa pozrieme na to, ako vybrať názov z viacerých obchodov)*. Ďalej opäť použijeme **SPLIT()**, ale už s oddeľovačom '?', aby sme oddelili reťazec požiadavky a vybrali prvý prvok. Nezabudnime previesť na typ **TEXT** pomocou `::TEXT`, pretože **SPLIT()* vracia iný typ. Nazvime tento atribút `possible_name`.
+Tu používame **CTE**, v ktorom vyberáme z tabuľky `products_staging` `EAN` tovaru, a potom pomocou `URL` najprv ho rozdelíme pomocou prikazu **SPLIT()** s oddeľovačom '/' a pomocou **ARRAY_SIZE() - 1** vyberieme poslednú časť v tomto poli, t. j. zvyčajne názov tovaru  *(nie vždy je to však názov tovaru, ďalej sa pozrieme na to, ako vybrať názov z viacerých obchodov)*. Ďalej opäť použijeme **SPLIT()**, ale už s oddeľovačom '?', aby sme oddelili reťazec požiadavky a vybrali prvý prvok. Nezabudnime previesť na typ **TEXT** pomocou `::TEXT`, pretože **SPLIT()** vracia iný typ. Nazvime tento atribút `possible_name`.
 Ďalej v prikaze vyberieme ten istý `ean` a `possible_name`, avšak potom použijeme **QUALIFY** (ktorý je analógiou **WHERE**, ale môže sa používať s Window funkciami) a použijeme **ROW_NUMBER()**, kde zoskupíme podľa `ean` a urobíme poradie pomocou **CASE**, v ktorom použijeme **RLIKE**, ktorý kontroluje zhodu s **regulárnym výrazom** '^[A-Za-z-]+$'.
 Rozložme si náš výraz podrobnejšie:
 - `^` - začiatok riadku
@@ -190,12 +187,12 @@ Rozložme si náš výraz podrobnejšie:
 - `-` - zahrnieme spojovník
 - `+` - jeden alebo viac znakov
 - `$` - koniec riadku
+
 Výraz kontroluje, či celý riadok pozostáva iba z latinských písmen a spojovníkov
 Ak náš `possible_name` zodpovedá výrazu, umiestnime ho na miesto 0 v poradí, inak ho umiestnime na vyššie miesto 1. Tým pádom budeme mať na prvom mieste najvhodnejší význam pre nás.
 Ďalej skontrolujeme riadok, ktorý je na prvom mieste, vrátime ho a dostaneme možný názov tovaru.
 
 Teraz sa pozrime na tabuľku `dim_shop`:
-
 #### Kód:
 ```sql
 CREATE OR REPLACE TABLE dim_shop AS
@@ -211,7 +208,6 @@ FROM (
 V nej pomocou **ROW_NUMBER()** stále robíme `idshop`, a v poddotaze vyberáme jedinečné hodnoty podľa `shop_name` a `url`, ale url obchodu sme dodatočne pridali pre pohodlie analytikov pomocou **SPLIT_PART()**, ktorá rozdeľuje url tovaru na časti s oddeľovačom '/'' a berie 3. časť (pretože názov obchodu bude v tretej časti), a ďalej používame **CONCAT()**, aby sme vrátili 'https://' na začiatok.
 
 Teraz sa pozrime na tabuľku `dim_date`, ktorá je podobná tabuľke `dim_time`:
-
 #### Kód:
 ```sql
 CREATE OR REPLACE TABLE dim_date AS
@@ -235,14 +231,13 @@ FROM (
 );
 ```
 
-Tu najprv v poddotaze premeníme `latest_update` cez **TO_TIMESTAMP_LTZ()**, pretože tento atribút je pôvodne v nevhodnom formáte, potom pre iddate použijeme **DATE()** a cez **TO_CHAR()** premeníme na náš formát:
+Tu najprv v poddotaze premeníme `latest_update` cez **TO_TIMESTAMP_LTZ()**, pretože tento atribút je pôvodne v nevhodnom formáte, potom pre `iddate` použijeme **DATE()** a cez **TO_CHAR()** premeníme na náš formát:
 - `YYYY` - rok
 - `MM` - mesiac
 - `DD` - deň
 Ďalej zapíšeme **DATE()** ako `date`, **YEAR()** ako `year`, **MONTH()** ako `month`, **DAY()** ako `day`, **QUARTER()** ako `quarter` a pomocou **CASE** a **DAYNAME()** zapíšeme celý názov dňa ako `weekname`.
 
 A na záver sa pozrime na `fact_product_pricing`:
-
 #### Kód:
 ```sql
 CREATE OR REPLACE TABLE fact_product_pricing AS
@@ -307,7 +302,6 @@ DROP TABLE IF EXISTS products_staging;
 ## 4. Vizualizácia dát
 Dashboard obsahuje **7 vizualizácií**, z ktorých každá pomôže analyzovať trh, obchody, ich tovary a ich reklamu.
 
----
 ### Graf 1: Top 10 obchodov
 Táto vizualizácia zobrazí 10 najlepších obchodov na základe ich hodnotenia, počtu recenzií a množstva predávaného tovaru. Pomáha analyzovať konkurenciu a na základe toho vylepšiť svoj obchod.
 
