@@ -22,6 +22,7 @@ V dátovom súbore sa nachádza 1 tabuľka so všetkými údajmi, z ktorých mô
 - `shop` – názov obchodu, jeho hodnotenie a počet recenzií
 - `promotion` – text štítku
 - `offer` – odkaz na tovar, jeho aktuálnu a starú cenu, cenu dopravy, konečnú cenu, pozíciu v reklame, menu, v ktorej sa predáva, krajinu, či je potvrdený, či sa predáva priamo v Google, ako aj dodatočný komentár.<br/>
+
 A tiež zistiť dátum a čas aktualizácie údajov.
 
 Účelom ELT procesu bolo tieto dáta pripraviť, transformovať a sprístupniť pre viacdimenzionálnu analýzu.
@@ -235,6 +236,7 @@ Tu najprv v poddotaze premeníme `latest_update` cez **TO_TIMESTAMP_LTZ()**, pre
 - `YYYY` - rok
 - `MM` - mesiac
 - `DD` - deň<br/>
+
 Ďalej zapíšeme **DATE()** ako `date`, **YEAR()** ako `year`, **MONTH()** ako `month`, **DAY()** ako `day`, **QUARTER()** ako `quarter` a pomocou **CASE** a **DAYNAME()** zapíšeme celý názov dňa ako `weekname`.
 
 A na záver sa pozrime na `fact_product_pricing`:
