@@ -21,7 +21,7 @@ V dátovom súbore sa nachádza 1 tabuľka so všetkými údajmi, z ktorých mô
 - `product` - EAN tovaru
 - `shop` – názov obchodu, jeho hodnotenie a počet recenzií
 - `promotion` – text štítku
-- `offer` – odkaz na tovar, jeho aktuálnu a starú cenu, cenu dopravy, konečnú cenu, pozíciu v reklame, menu, v ktorej sa predáva, krajinu, či je potvrdený, či sa predáva priamo v Google, ako aj dodatočný komentár.
+- `offer` – odkaz na tovar, jeho aktuálnu a starú cenu, cenu dopravy, konečnú cenu, pozíciu v reklame, menu, v ktorej sa predáva, krajinu, či je potvrdený, či sa predáva priamo v Google, ako aj dodatočný komentár.<br/>
 A tiež zistiť dátum a čas aktualizácie údajov.
 
 Účelom ELT procesu bolo tieto dáta pripraviť, transformovať a sprístupniť pre viacdimenzionálnu analýzu.
@@ -186,7 +186,7 @@ Rozložme si náš výraz podrobnejšie:
 - `a-z` písmená od a do z
 - `-` - zahrnieme spojovník
 - `+` - jeden alebo viac znakov
-- `$` - koniec riadku
+- `$` - koniec riadku<br/>
 
 Výraz kontroluje, či celý riadok pozostáva iba z latinských písmen a spojovníkov
 Ak náš `possible_name` zodpovedá výrazu, umiestnime ho na miesto 0 v poradí, inak ho umiestnime na vyššie miesto 1. Tým pádom budeme mať na prvom mieste najvhodnejší význam pre nás.
@@ -234,7 +234,7 @@ FROM (
 Tu najprv v poddotaze premeníme `latest_update` cez **TO_TIMESTAMP_LTZ()**, pretože tento atribút je pôvodne v nevhodnom formáte, potom pre `iddate` použijeme **DATE()** a cez **TO_CHAR()** premeníme na náš formát:
 - `YYYY` - rok
 - `MM` - mesiac
-- `DD` - deň
+- `DD` - deň<br/>
 Ďalej zapíšeme **DATE()** ako `date`, **YEAR()** ako `year`, **MONTH()** ako `month`, **DAY()** ako `day`, **QUARTER()** ako `quarter` a pomocou **CASE** a **DAYNAME()** zapíšeme celý názov dňa ako `weekname`.
 
 A na záver sa pozrime na `fact_product_pricing`:
