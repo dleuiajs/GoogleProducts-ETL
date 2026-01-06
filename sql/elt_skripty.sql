@@ -181,3 +181,6 @@ WHERE rn = 1;
 -- kontrola
 SELECT * FROM fact_product_pricing
 ORDER BY id_product_pricing;
+
+-- clearing data
+DROP TABLE IF EXISTS products_staging;
