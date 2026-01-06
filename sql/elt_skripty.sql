@@ -168,7 +168,7 @@ FROM (
         AVG(ps.price) OVER (PARTITION BY p.ean) AS avg_product_price,
         COUNT(DISTINCT ps.shop_name) OVER (PARTITION BY p.ean) AS count_shops_selling,
         -- Removing duplicates
-        ROW_NUMBER() OVER (PARTITION BY o.url ORDER BY position) AS rn
+        ROW_NUMBER() OVER (PARTITION BY o.url, ddate.date, dtime.time ORDER BY position) AS rn
     FROM products_staging ps
     JOIN dim_product p ON ps.ean = p.ean
     JOIN dim_shop s ON ps.shop_name = s.name
