@@ -47,8 +47,9 @@ V ukážke bola navrhnutá **schéma hviezdy (star schema)** podľa Kimballovej 
 - **`dim_promotion`** - obsahuje údaje o propagácii tovaru (text na propagáciu). Vzťah 1:N, SCD 1
 - **`dim_offer`** - obsahuje údaje o tovare v obchode (odkaz na tovar, mena, v ktorej sa predáva, krajina, či je tovar potvrdený a či sa predáva priamo v Google). Vzťah 1:N, SCD 0
 - **`dim_time`** – obsahuje údaje o čase (celkový čas, hodina, minúta, sekunda, am alebo pm). Vzťah 1:N, SCD 0
-- **`dim_date`** – obsahuje údaje o dátume (celý dátum, rok, mesiac, deň, štvrťrok, názov dňa). Vzťah 1:N, SCD 0
-- **`fact_product_pricing`** - obsahuje primárny kľúč `id_product_pricing`, cudzie kľúče: `idshop`, `ean`, `idoffer`, `idpromotion`, `iddate`, `idtime` a hlavné metriky: `price`, `old_price`, `shipping_cost`, `total_cost`, `position`, `shop_review_rating`, `shop_review_count`, `avg_product_price` a `count_shops_selling`.
+- **`dim_date`** – obsahuje údaje o dátume (celý dátum, rok, mesiac, deň, štvrťrok, názov dňa). Vzťah 1:N, SCD 0<br/>
+
+`fact_product_pricing` - obsahuje primárny kľúč `id_product_pricing`, cudzie kľúče: `idshop`, `ean`, `idoffer`, `idpromotion`, `iddate`, `idtime` a hlavné metriky: `price`, `old_price`, `shipping_cost`, `total_cost`, `position`, `shop_review_rating`, `shop_review_count`, `avg_product_price` a `count_shops_selling`.
 
 Štruktúra hviezdicového modelu je znázornená na diagrame nižšie. Diagram ukazuje prepojenia medzi faktovou tabuľkou a dimenziami, čo zjednodušuje pochopenie a implementáciu modelu.
 
